@@ -1,13 +1,251 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-charcoal font-sans;
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-burgundy hover:bg-burgundy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-burgundy transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center px-4 py-2 border border-burgundy text-sm font-medium rounded-md text-burgundy bg-white hover:bg-ivory focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-burgundy transition-colors duration-200;
+  }
+
+  .input-primary {
+    @apply block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-burgundy focus:border-burgundy sm:text-sm;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-soft overflow-hidden transition-all duration-200 hover:shadow-md;
+  }
+
+  .product-card {
+    @apply card;
+  }
+
+  .product-image {
+    @apply w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105;
+  }
+
+  .product-info {
+    @apply p-4;
+  }
+
+  .product-title {
+    @apply text-lg font-medium text-charcoal group-hover:text-burgundy transition-colors duration-200;
+  }
+
+  .product-price {
+    @apply mt-1 text-lg font-semibold text-burgundy;
+  }
+
+  .product-category {
+    @apply text-sm text-gray-500;
+  }
+
+  .filter-section {
+    @apply space-y-4;
+  }
+
+  .filter-title {
+    @apply text-sm font-medium text-charcoal;
+  }
+
+  .filter-options {
+    @apply space-y-2;
+  }
+
+  .filter-option {
+    @apply flex items-center;
+  }
+
+  .filter-checkbox {
+    @apply h-4 w-4 text-burgundy focus:ring-burgundy border-gray-300 rounded;
+  }
+
+  .filter-label {
+    @apply ml-2 text-sm text-gray-700;
+  }
+
+  .price-range {
+    @apply flex items-center space-x-2;
+  }
+
+  .price-input {
+    @apply input-primary w-24;
+  }
+
+  .sort-select {
+    @apply input-primary;
+  }
+
+  .loading-spinner {
+    @apply animate-spin h-8 w-8 text-burgundy;
+  }
+
+  .error-message {
+    @apply text-red-600 text-sm mt-1;
+  }
+
+  .success-message {
+    @apply text-green-600 text-sm mt-1;
+  }
+
+  .announcement-bar {
+    @apply bg-burgundy text-white text-sm py-2 text-center;
+  }
+
+  .header {
+    @apply bg-white shadow-soft;
+  }
+
+  .nav-link {
+    @apply inline-flex items-center px-1 pt-1 text-sm font-medium text-charcoal hover:text-burgundy;
+  }
+
+  .nav-link-active {
+    @apply text-burgundy border-b-2 border-burgundy;
+  }
+
+  .search-overlay {
+    @apply fixed inset-0 z-50 bg-black bg-opacity-50;
+  }
+
+  .search-input {
+    @apply w-full px-4 py-3 text-lg bg-white rounded-lg shadow-soft focus:outline-none focus:ring-2 focus:ring-burgundy;
+  }
+
+  .mobile-menu {
+    @apply sm:hidden;
+  }
+
+  .mobile-menu-item {
+    @apply block pl-3 pr-4 py-2 text-base font-medium text-charcoal hover:text-burgundy hover:bg-ivory;
+  }
+
+  .user-menu {
+    @apply absolute right-0 w-48 mt-2 py-2 bg-white rounded-lg shadow-soft hidden group-hover:block;
+  }
+
+  .user-menu-item {
+    @apply block px-4 py-2 text-sm text-charcoal hover:bg-ivory;
+  }
+
+  .cart-badge {
+    @apply absolute -top-1 -right-1 bg-burgundy text-white text-xs rounded-full w-4 h-4 flex items-center justify-center;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full hover:bg-gray-400;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Transitions */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Focus styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-burgundy;
+}
+
+/* Hover effects */
+.hover-lift {
+  @apply transition-transform duration-200 hover:-translate-y-1;
+}
+
+.hover-scale {
+  @apply transition-transform duration-200 hover:scale-105;
+}
+
+/* Shadows */
+.shadow-soft {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Typography */
+.font-serif {
+  font-family: 'Inter', serif;
+}
+
+.font-sans {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Colors */
+.text-burgundy {
+  color: #800020;
+}
+
+.text-charcoal {
+  color: #36454F;
+}
+
+.bg-burgundy {
+  background-color: #800020;
+}
+
+.bg-burgundy-dark {
+  background-color: #600018;
+}
+
+.bg-ivory {
+  background-color: #FFFFF0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .container {
+    @apply px-6;
+  }
+}
+
+@media (min-width: 1025px) {
+  .container {
+    @apply px-8;
+  }
 }
