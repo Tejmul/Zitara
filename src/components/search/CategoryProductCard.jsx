@@ -1,10 +1,8 @@
-// src/components/search/ProductCard.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { useFavorites } from '../../context/FavoritesContext';
 
-const ProductCard = ({ product, similarity }) => {
+const CategoryProductCard = ({ product }) => {
   const [imageError, setImageError] = useState(false);
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
   
@@ -23,7 +21,7 @@ const ProductCard = ({ product, similarity }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      <Link to={`/product/${product.id}`} className="block relative">
+      <div className="block relative">
         <div className="relative aspect-square">
           <img
             src={imageError ? '/placeholder-image.jpg' : product.image}
@@ -41,11 +39,6 @@ const ProductCard = ({ product, similarity }) => {
               className={`w-4 h-4 ${isFavorite(product.id) ? 'text-[#9d4e4e] fill-current' : 'text-gray-600'}`}
             />
           </button>
-          {similarity && (
-            <div className="absolute top-3 left-3 px-2 py-1 bg-white/90 rounded text-xs font-medium text-[#9d4e4e]">
-              {Math.round(similarity * 100)}% Match
-            </div>
-          )}
         </div>
         
         <div className="p-4">
@@ -89,9 +82,9 @@ const ProductCard = ({ product, similarity }) => {
             </div>
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 };
 
-export default ProductCard;
+export default CategoryProductCard; 

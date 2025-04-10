@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -13,7 +13,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // Check if there's a stored token and try to restore the session
@@ -39,50 +39,41 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
+    setLoading(true);
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      const { token, user: userData } = response.data;
-      
-      localStorage.setItem('authToken', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(userData);
-      
-      return userData;
+      // Simulate login API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setUser({ email, name: 'Test User' });
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to login');
-    }
-  };
-
-  const register = async ({ firstName, lastName, email, password }) => {
-    try {
-      const response = await axios.post('/api/auth/register', {
-        firstName,
-        lastName,
-        email,
-        password,
-      });
-      
-      const { token, user: userData } = response.data;
-      
-      localStorage.setItem('authToken', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(userData);
-      
-      return userData;
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to register');
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = async () => {
+    setLoading(true);
     try {
-      await axios.post('/api/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      localStorage.removeItem('authToken');
-      delete axios.defaults.headers.common['Authorization'];
+      // Simulate logout API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setUser(null);
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (email, password) => {
+    setLoading(true);
+    try {
+      // Simulate register API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setUser({ email, name: 'New User' });
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,8 +107,8 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
-    register,
     logout,
+    register,
     updateProfile,
     forgotPassword,
     resetPassword,
@@ -125,7 +116,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

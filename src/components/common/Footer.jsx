@@ -4,110 +4,114 @@ import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react'
 
 const Footer = () => {
   return (
-    <footer className="bg-charcoal text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-[#f8f5f2] text-[#1a1a1a] border-t border-[#1a1a1a]/10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
           {/* About */}
-          <div>
-            <h3 className="font-serif text-lg mb-4">About Us</h3>
-            <p className="text-white/60 text-sm">
-              We specialize in helping you find the perfect jewellery through our advanced visual search technology.
-              Browse our curated collection of fine jewellery from trusted artisans and designers.
+          <div className="space-y-6">
+            <h3 className="font-serif text-xl text-[#1a1a1a] font-light tracking-widest">ABOUT US</h3>
+            <p className="text-[#1a1a1a]/70 text-sm leading-relaxed">
+              Zithara is a premier destination for exquisite jewelry, offering a curated collection of timeless pieces crafted by master artisans. Our commitment to quality and elegance defines the Zithara experience.
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-serif text-lg mb-4">Quick Links</h3>
-            <ul className="space-y-2">
+          {/* Collections */}
+          <div className="space-y-6">
+            <h3 className="font-serif text-xl text-[#1a1a1a] font-light tracking-widest">COLLECTIONS</h3>
+            <ul className="space-y-4">
               <li>
-                <Link to="/categories/rings" className="text-white/60 hover:text-burgundy text-sm">
+                <Link to="/rings" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
                   Rings
                 </Link>
               </li>
               <li>
-                <Link to="/categories/necklaces" className="text-white/60 hover:text-burgundy text-sm">
+                <Link to="/necklaces" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
                   Necklaces
                 </Link>
               </li>
               <li>
-                <Link to="/categories/earrings" className="text-white/60 hover:text-burgundy text-sm">
+                <Link to="/earrings" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
                   Earrings
                 </Link>
               </li>
               <li>
-                <Link to="/categories/bracelets" className="text-white/60 hover:text-burgundy text-sm">
+                <Link to="/bracelets" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
                   Bracelets
+                </Link>
+              </li>
+              <li>
+                <Link to="/favorites" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
+                  Favorites
                 </Link>
               </li>
             </ul>
           </div>
 
           {/* Customer Service */}
-          <div>
-            <h3 className="font-serif text-lg mb-4">Customer Service</h3>
-            <ul className="space-y-2">
+          <div className="space-y-6">
+            <h3 className="font-serif text-xl text-[#1a1a1a] font-light tracking-widest">CUSTOMER SERVICE</h3>
+            <ul className="space-y-4">
               <li>
-                <Link to="/contact" className="text-white/60 hover:text-burgundy text-sm">
+                <Link to="/contact" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/shipping" className="text-white/60 hover:text-burgundy text-sm">
-                  Shipping & Returns
+                <Link to="/shipping" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
+                  Shipping Information
                 </Link>
               </li>
               <li>
-                <Link to="/faq" className="text-white/60 hover:text-burgundy text-sm">
+                <Link to="/returns" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
+                  Returns & Exchanges
+                </Link>
+              </li>
+              <li>
+                <Link to="/faq" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-white/60 hover:text-burgundy text-sm">
-                  Privacy Policy
+                <Link to="/care-guide" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] text-sm transition-colors">
+                  Jewelry Care Guide
                 </Link>
               </li>
             </ul>
           </div>
 
           {/* Contact Info */}
-          <div>
-            <h3 className="font-serif text-lg mb-4">Contact Us</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center text-white/60 text-sm">
-                <Mail className="w-4 h-4 mr-2" />
-                support@jewellerysearch.com
+          <div className="space-y-6">
+            <h3 className="font-serif text-xl text-[#1a1a1a] font-light tracking-widest">CONTACT US</h3>
+            <ul className="space-y-6">
+              <li className="flex items-start space-x-4 text-[#1a1a1a]/70 text-sm">
+                <MapPin className="h-5 w-5 text-[#9d4e4e] mt-0.5" />
+                <span>123 Jewelry Lane, Fashion District, New York, NY 10001</span>
               </li>
-              <li className="flex items-center text-white/60 text-sm">
-                <Phone className="w-4 h-4 mr-2" />
-                +1 (555) 123-4567
+              <li className="flex items-center space-x-4 text-[#1a1a1a]/70 text-sm">
+                <Phone className="h-5 w-5 text-[#9d4e4e]" />
+                <span>+1 (555) 123-4567</span>
               </li>
-              <li className="flex items-center text-white/60 text-sm">
-                <MapPin className="w-4 h-4 mr-2" />
-                123 Jewellery Lane, NY 10001
+              <li className="flex items-center space-x-4 text-[#1a1a1a]/70 text-sm">
+                <Mail className="h-5 w-5 text-[#9d4e4e]" />
+                <span>info@zitharajewelry.com</span>
+              </li>
+              <li className="flex space-x-8 pt-4">
+                <a href="#" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] transition-colors">
+                  <Facebook className="h-5 w-5" />
+                </a>
+                <a href="#" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] transition-colors">
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a href="#" className="text-[#1a1a1a]/70 hover:text-[#9d4e4e] transition-colors">
+                  <Twitter className="h-5 w-5" />
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Social Links & Copyright */}
-        <div className="mt-12 pt-8 border-t border-white/10">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex space-x-4 mb-4 md:mb-0">
-              <a href="#" className="text-white/60 hover:text-burgundy">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-white/60 hover:text-burgundy">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-white/60 hover:text-burgundy">
-                <Twitter className="w-5 h-5" />
-              </a>
-            </div>
-            <p className="text-white/60 text-sm">
-              © {new Date().getFullYear()} Jewellery Search. All rights reserved.
-            </p>
-          </div>
+        <div className="border-t border-[#1a1a1a]/10 mt-20 pt-8 text-center">
+          <p className="text-[#1a1a1a]/50 text-sm">&copy; {new Date().getFullYear()} Zithara Jewelry. All rights reserved.</p>
         </div>
       </div>
     </footer>

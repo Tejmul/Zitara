@@ -1,9 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
+import { visualSearchService } from '../api/visualSearch';
 
 const SearchContext = createContext();
 
 export const useSearch = () => {
-  return useContext(SearchContext);
+  const context = useContext(SearchContext);
+  if (!context) {
+    throw new Error('useSearch must be used within a SearchProvider');
+  }
+  return context;
 };
 
 export const SearchProvider = ({ children }) => {
@@ -16,44 +21,33 @@ export const SearchProvider = ({ children }) => {
   const performSearch = async (image) => {
     setLoading(true);
     setError(null);
+    setSearchResults([]);
+
     try {
+      // Create a FormData object
       const formData = new FormData();
       formData.append('image', image);
 
-      const response = await fetch('http://localhost:3001/api/visual-search', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to perform visual search. Please try again.');
-      }
-
-      const data = await response.json();
+      const response = await visualSearchService.searchByImage(formData);
       
-      if (!data.results || !Array.isArray(data.results)) {
+      if (response && response.results) {
+        setSearchResults(response.results);
+        const imageUrl = URL.createObjectURL(image);
+        setSelectedImage(imageUrl);
+
+        // Add to search history
+        setSearchHistory(prev => [{
+          id: Date.now(),
+          imageUrl,
+          timestamp: new Date().toISOString(),
+          resultCount: response.results.length
+        }, ...prev].slice(0, 10)); // Keep only last 10 searches
+      } else {
         throw new Error('Invalid response format from server');
       }
-
-      // Sort results by similarity score
-      const sortedResults = data.results.sort((a, b) => b.similarity - a.similarity);
-      
-      setSearchResults(sortedResults);
-      const imageUrl = URL.createObjectURL(image);
-      setSelectedImage(imageUrl);
-
-      // Add to search history
-      setSearchHistory(prev => [{
-        id: Date.now(),
-        imageUrl,
-        timestamp: new Date().toISOString(),
-        resultCount: sortedResults.length
-      }, ...prev].slice(0, 10)); // Keep only last 10 searches
-
     } catch (err) {
       console.error('Search error:', err);
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+      setError(err.message || 'An error occurred during visual search');
       setSearchResults([]);
     } finally {
       setLoading(false);
@@ -105,4 +99,6 @@ export const SearchProvider = ({ children }) => {
       {children}
     </SearchContext.Provider>
   );
-}; 
+};
+
+export default SearchContext; 

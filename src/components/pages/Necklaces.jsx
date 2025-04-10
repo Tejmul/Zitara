@@ -1,8 +1,8 @@
 import React from 'react';
-import ZitharaJewelry from '../product/ZitharaJewelry';
+import CategoryPage from './CategoryPage';
 
 const Necklaces = () => {
-  return <ZitharaJewelry category="Necklaces" />;
+  return <CategoryPage category="Necklaces" />;
 };
 
 export default Necklaces; 

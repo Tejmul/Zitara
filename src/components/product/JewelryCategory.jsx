@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Filter, ChevronDown, ChevronUp, X, Heart, ShoppingBag, Search, ArrowUpCircle } from 'lucide-react';
+import ProductCard from '../common/ProductCard';
 
 const JewelryCategory = ({ category, title, description }) => {
   const [products, setProducts] = useState([]);
@@ -171,7 +172,7 @@ const JewelryCategory = ({ category, title, description }) => {
   };
 
   return (
-    <div className="min-h-screen bg-ivory">
+    <div className="min-h-screen bg-[#f8f5f2]">
       {/* Announcement Bar */}
       <div className="announcement-bar">
         <p>Free shipping on orders over $100 | 30-day returns</p>
@@ -182,7 +183,7 @@ const JewelryCategory = ({ category, title, description }) => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <nav className="hidden md:flex space-x-8">
-              <Link to="/" className="font-serif text-lg text-charcoal hover:text-burgundy transition-colors">Zithara</Link>
+              <Link to="/" className="font-serif text-lg text-[#1a1a1a] hover:text-burgundy transition-colors">Zithara</Link>
               <Link to="/rings" className="nav-link">Rings</Link>
               <Link to="/necklaces" className="nav-link">Necklaces</Link>
               <Link to="/earrings" className="nav-link">Earrings</Link>
@@ -197,9 +198,9 @@ const JewelryCategory = ({ category, title, description }) => {
                     placeholder="Search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-48 pl-10 pr-4 py-2 border-b border-charcoal/20 focus:border-burgundy transition-colors bg-transparent"
+                    className="w-48 pl-10 pr-4 py-2 border-b border-[#1a1a1a]/20 focus:border-burgundy transition-colors bg-transparent"
                   />
-                  <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-charcoal/60" size={20} />
+                  <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-[#1a1a1a]/60" size={20} />
                 </form>
               </div>
               
@@ -228,12 +229,12 @@ const JewelryCategory = ({ category, title, description }) => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-12">
         {/* Breadcrumb */}
         <div className="flex items-center text-sm mb-8">
-          <Link to="/" className="text-charcoal/60 hover:text-burgundy transition-colors">Home</Link>
-          <ChevronDown className="rotate-90 mx-2 text-charcoal/40" size={14} />
-          <span className="font-medium text-charcoal">{title}</span>
+          <Link to="/" className="text-[#1a1a1a]/60 hover:text-burgundy transition-colors">Home</Link>
+          <ChevronDown className="rotate-90 mx-2 text-[#1a1a1a]/40" size={14} />
+          <span className="font-medium text-[#1a1a1a]">{title}</span>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8">
@@ -305,7 +306,7 @@ const JewelryCategory = ({ category, title, description }) => {
                         onChange={() => handleFilterChange('priceRange', '2000')}
                         className="filter-checkbox"
                       />
-                      <label htmlFor="price-2000" className="filter-label">$2,000+</label>
+                      <label htmlFor="price-2000" className="filter-label">Over $2,000</label>
                     </div>
                   </div>
                 </div>
@@ -518,18 +519,18 @@ const JewelryCategory = ({ category, title, description }) => {
           <div className="flex-1">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
               <div>
-                <h1 className="font-serif text-3xl text-charcoal mb-2">{title}</h1>
-                <p className="text-charcoal/60">
+                <h1 className="font-serif text-3xl text-[#1a1a1a] mb-2">{title}</h1>
+                <p className="text-[#1a1a1a]/60">
                   {description}
                 </p>
               </div>
               <div className="mt-4 md:mt-0 flex items-center space-x-4">
-                <span className="text-sm text-charcoal/60">{products.length} products</span>
+                <span className="text-sm text-[#1a1a1a]/60">{products.length} products</span>
                 
                 <select
                   value={sortBy}
                   onChange={(e) => handleSortChange(e.target.value)}
-                  className="sort-select"
+                  className="border border-[#1a1a1a]/10 rounded-md py-2 px-4 bg-white focus:outline-none focus:ring-1 focus:ring-[#9d4e4e] focus:border-[#9d4e4e] text-[#1a1a1a]"
                 >
                   <option value="recommended">Recommended</option>
                   <option value="price-low-high">Price: Low to High</option>
@@ -542,7 +543,7 @@ const JewelryCategory = ({ category, title, description }) => {
             {loading ? (
               <div className="flex justify-center items-center py-12">
                 <div className="loading-spinner"></div>
-                <p className="ml-3 text-charcoal/60">Loading {category.toLowerCase()}...</p>
+                <p className="ml-3 text-[#1a1a1a]/60">Loading {category.toLowerCase()}...</p>
               </div>
             ) : error ? (
               <div className="text-center py-12">
@@ -556,7 +557,7 @@ const JewelryCategory = ({ category, title, description }) => {
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-charcoal/60 mb-4">No {category.toLowerCase()} found matching your criteria</p>
+                <p className="text-[#1a1a1a]/60 mb-4">No {category.toLowerCase()} found matching your criteria</p>
                 <button
                   onClick={clearFilters}
                   className="btn-secondary"
@@ -567,40 +568,7 @@ const JewelryCategory = ({ category, title, description }) => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map(product => (
-                  <div key={product.id} className="product-card group">
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="product-image"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <button 
-                          onClick={() => addToCart(product.id)}
-                          className="w-full btn-primary mb-2"
-                        >
-                          Add to Cart
-                        </button>
-                        <button 
-                          onClick={() => addToWishlist(product.id)}
-                          className="w-full btn-secondary"
-                        >
-                          Add to Wishlist
-                        </button>
-                      </div>
-                    </div>
-                    <div className="product-info">
-                      <Link to={`/products/${product.id}`} className="block">
-                        <h3 className="product-title">{product.name}</h3>
-                        <p className="product-price">${product.price.toLocaleString()}</p>
-                        <p className="product-category">
-                          {product.metalType.replace('-', ' ').charAt(0).toUpperCase() + product.metalType.slice(1).replace('-', ' ')} • 
-                          {product.stoneType.charAt(0).toUpperCase() + product.stoneType.slice(1)}
-                        </p>
-                      </Link>
-                    </div>
-                  </div>
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             )}
@@ -612,9 +580,9 @@ const JewelryCategory = ({ category, title, description }) => {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 bg-burgundy text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-burgundy-dark transition-colors duration-200"
+          className="fixed bottom-6 right-6 bg-[#9d4e4e] text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:bg-[#7a3e3e] transition-colors"
         >
-          <ArrowUpCircle size={24} />
+          <ArrowUpCircle size={20} />
         </button>
       )}
     </div>

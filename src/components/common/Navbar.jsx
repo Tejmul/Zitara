@@ -1,144 +1,248 @@
 // src/components/common/Navbar.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Heart, Menu, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { FaSearch, FaUser, FaShoppingCart, FaBars, FaTimes } from 'react-icons/fa';
-import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
+import { useFavorites } from '../../context/FavoritesContext';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { favorites } = useFavorites();
   const location = useLocation();
-  
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-  
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
-  
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+
+  const isActive = (path) => {
+    return location.pathname === path;
   };
-  
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
     }
   };
-  
+
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 bg-white shadow-md transition-all duration-300 ${
-      scrolled ? 'py-2' : 'py-4'
-    }`}>
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold text-gray-800">Zithara</span>
-        </Link>
-        
-        <div className="hidden md:flex items-center space-x-4">
-          <Link to="/search" className="flex items-center space-x-1 text-gray-600 hover:text-blue-600">
-            <FaSearch className="h-4 w-4" />
-            <span>Visual Search</span>
-          </Link>
-        </div>
-        
-        <button 
-          className="md:hidden text-gray-600 hover:text-gray-900" 
-          onClick={toggleMenu}
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? <FaTimes className="h-6 w-6" /> : <FaBars className="h-6 w-6" />}
-        </button>
-        
-        <div className={`absolute top-full left-0 w-full md:static md:w-auto md:flex md:items-center transition-all duration-300 ${
-          menuOpen ? 'block bg-white shadow-md' : 'hidden'
-        } md:block`}>
-          <ul className="flex flex-col md:flex-row md:items-center md:space-x-6 p-4 md:p-0">
-            <li>
-              <Link to="/categories/rings" className="block py-2 text-gray-600 hover:text-blue-600">
-                Rings
-              </Link>
-            </li>
-            <li>
-              <Link to="/categories/necklaces" className="block py-2 text-gray-600 hover:text-blue-600">
-                Necklaces
-              </Link>
-            </li>
-            <li>
-              <Link to="/categories/earrings" className="block py-2 text-gray-600 hover:text-blue-600">
-                Earrings
-              </Link>
-            </li>
-            <li>
-              <Link to="/categories/bracelets" className="block py-2 text-gray-600 hover:text-blue-600">
-                Bracelets
-              </Link>
-            </li>
-            {user ? (
-              <>
-                <li>
-                  <Link to="/profile" className="flex items-center space-x-1 text-gray-600 hover:text-blue-600">
-                    <FaUser className="h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/cart" className="flex items-center space-x-1 text-gray-600 hover:text-blue-600">
-                    <FaShoppingCart className="h-4 w-4" />
-                    <span>Cart</span>
-                  </Link>
-                </li>
-                {user.role === 'admin' && (
-                  <li>
-                    <Link to="/admin" className="block py-2 text-gray-600 hover:text-blue-600">
-                      Admin
-                    </Link>
-                  </li>
+    <>
+      <div className="h-24 w-full"></div> {/* Spacer for fixed navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+        <div className="max-w-screen-2xl mx-auto">
+          <div className="flex items-center justify-between h-24 px-8 lg:px-16">
+            {/* Logo */}
+            <Link 
+              to="/" 
+              className="text-2xl font-serif text-[#1a1a1a] hover:text-[#9d4e4e] transition-colors"
+              style={{ letterSpacing: '0.2em' }}
+            >
+              ZITHARA
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center justify-center flex-1 mx-12">
+              <div className="flex items-center space-x-16">
+                <Link
+                  to="/rings"
+                  className={`text-sm transition-colors relative group ${
+                    isActive('/rings') 
+                      ? 'text-[#9d4e4e]' 
+                      : 'text-[#1a1a1a] hover:text-[#9d4e4e]'
+                  }`}
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  RINGS
+                  <span className={`absolute -bottom-2 left-0 w-full h-0.5 bg-[#9d4e4e] transform scale-x-0 transition-transform group-hover:scale-x-100 ${
+                    isActive('/rings') ? 'scale-x-100' : ''
+                  }`}></span>
+                </Link>
+                <Link
+                  to="/necklaces"
+                  className={`text-sm transition-colors relative group ${
+                    isActive('/necklaces') 
+                      ? 'text-[#9d4e4e]' 
+                      : 'text-[#1a1a1a] hover:text-[#9d4e4e]'
+                  }`}
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  NECKLACES
+                  <span className={`absolute -bottom-2 left-0 w-full h-0.5 bg-[#9d4e4e] transform scale-x-0 transition-transform group-hover:scale-x-100 ${
+                    isActive('/necklaces') ? 'scale-x-100' : ''
+                  }`}></span>
+                </Link>
+                <Link
+                  to="/earrings"
+                  className={`text-sm transition-colors relative group ${
+                    isActive('/earrings') 
+                      ? 'text-[#9d4e4e]' 
+                      : 'text-[#1a1a1a] hover:text-[#9d4e4e]'
+                  }`}
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  EARRINGS
+                  <span className={`absolute -bottom-2 left-0 w-full h-0.5 bg-[#9d4e4e] transform scale-x-0 transition-transform group-hover:scale-x-100 ${
+                    isActive('/earrings') ? 'scale-x-100' : ''
+                  }`}></span>
+                </Link>
+                <Link
+                  to="/bracelets"
+                  className={`text-sm transition-colors relative group ${
+                    isActive('/bracelets') 
+                      ? 'text-[#9d4e4e]' 
+                      : 'text-[#1a1a1a] hover:text-[#9d4e4e]'
+                  }`}
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  BRACELETS
+                  <span className={`absolute -bottom-2 left-0 w-full h-0.5 bg-[#9d4e4e] transform scale-x-0 transition-transform group-hover:scale-x-100 ${
+                    isActive('/bracelets') ? 'scale-x-100' : ''
+                  }`}></span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Icons */}
+            <div className="flex items-center space-x-8">
+              <Link
+                to="/favorites"
+                className="p-2 text-[#1a1a1a] hover:text-[#9d4e4e] transition-colors relative"
+              >
+                <Heart className="w-[22px] h-[22px]" strokeWidth={1.5} />
+                {favorites.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#9d4e4e] text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {favorites.length}
+                  </span>
                 )}
-                <li>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left py-2 text-gray-600 hover:text-blue-600"
+              </Link>
+              
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="px-8 py-2.5 text-sm text-[#1a1a1a] hover:text-[#9d4e4e] transition-colors"
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  LOGOUT
+                </button>
+              ) : (
+                <div className="flex items-center space-x-6">
+                  <Link
+                    to="/login"
+                    className="px-8 py-2.5 text-sm text-[#1a1a1a] hover:text-[#9d4e4e] transition-colors"
+                    style={{ letterSpacing: '0.15em' }}
                   >
-                    Logout
-                  </button>
-                </li>
-              </>
-            ) : (
-              <>
-                <li>
-                  <Link to="/login" className="block py-2 text-gray-600 hover:text-blue-600">
-                    Login
+                    LOGIN
                   </Link>
-                </li>
-                <li>
-                  <Link to="/register" className="block py-2 text-gray-600 hover:text-blue-600">
-                    Register
+                  <Link
+                    to="/register"
+                    className="px-8 py-2.5 text-sm bg-[#1a1a1a] text-white hover:bg-[#9d4e4e] transition-colors rounded"
+                    style={{ letterSpacing: '0.15em' }}
+                  >
+                    REGISTER
                   </Link>
-                </li>
-              </>
-            )}
-          </ul>
+                </div>
+              )}
+
+              {/* Mobile Menu Button */}
+              <button
+                className="lg:hidden p-2 text-[#1a1a1a] hover:text-[#9d4e4e] transition-colors"
+                onClick={toggleMenu}
+              >
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="lg:hidden bg-white border-t border-[#1a1a1a]/10">
+            <div className="max-w-screen-2xl mx-auto px-8">
+              <div className="flex flex-col py-8 space-y-8">
+                <Link
+                  to="/rings"
+                  className={`text-sm transition-colors ${
+                    isActive('/rings') ? 'text-[#9d4e4e]' : 'text-[#1a1a1a] hover:text-[#9d4e4e]'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  RINGS
+                </Link>
+                <Link
+                  to="/necklaces"
+                  className={`text-sm transition-colors ${
+                    isActive('/necklaces') ? 'text-[#9d4e4e]' : 'text-[#1a1a1a] hover:text-[#9d4e4e]'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  NECKLACES
+                </Link>
+                <Link
+                  to="/earrings"
+                  className={`text-sm transition-colors ${
+                    isActive('/earrings') ? 'text-[#9d4e4e]' : 'text-[#1a1a1a] hover:text-[#9d4e4e]'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  EARRINGS
+                </Link>
+                <Link
+                  to="/bracelets"
+                  className={`text-sm transition-colors ${
+                    isActive('/bracelets') ? 'text-[#9d4e4e]' : 'text-[#1a1a1a] hover:text-[#9d4e4e]'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  BRACELETS
+                </Link>
+                {!user && (
+                  <div className="flex flex-col space-y-8 pt-4 border-t border-[#1a1a1a]/10">
+                    <Link
+                      to="/login"
+                      className="text-sm text-[#1a1a1a] hover:text-[#9d4e4e] transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                      style={{ letterSpacing: '0.15em' }}
+                    >
+                      LOGIN
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="text-sm text-[#1a1a1a] hover:text-[#9d4e4e] transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                      style={{ letterSpacing: '0.15em' }}
+                    >
+                      REGISTER
+                    </Link>
+                  </div>
+                )}
+                {user && (
+                  <div className="pt-4 border-t border-[#1a1a1a]/10">
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="text-sm text-[#1a1a1a] hover:text-[#9d4e4e] transition-colors"
+                      style={{ letterSpacing: '0.15em' }}
+                    >
+                      LOGOUT
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+    </>
   );
 };
 

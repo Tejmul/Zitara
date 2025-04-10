@@ -1,58 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Search, Heart, ShoppingBag, ChevronDown, ChevronUp, X, Plus, Minus, ArrowUpCircle } from 'lucide-react';
+import CategoryProductCard from '../search/CategoryProductCard';
+import { dummyProducts } from '../../data/dummyProducts';
 
-const CategoryPage = () => {
-  const { category } = useParams();
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+const CategoryPage = ({ category: propCategory }) => {
+  const { category: urlCategory } = useParams();
   const [priceRange, setPriceRange] = useState([799, 1599]);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [filters, setFilters] = useState({
-    price: [799, 1599],
-    metal: [],
-    stone: [],
-    style: []
+    metalType: '',
+    stoneType: '',
+    priceRange: 'all'
   });
   const [sortBy, setSortBy] = useState('recommended');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sample data for testing
-  const products = [
-    {
-      id: 1,
-      name: "Link Chain Bracelet",
-      price: 1299,
-      image: "/api/placeholder/600/600",
-      category: "Bracelets",
-      description: "A sleek, modern link chain bracelet that adds the right amount of shine to your wrist. Plus, with its adjustable fit, it's made to sit perfectly, no matter your style.",
-      features: [
-        "Pure 925 sterling silver – High-quality, tarnish-resistant, and hypoallergenic",
-        "Classic link design – Timeless style that complements your jewelry collection",
-        "Adjustable fit – Comfortable for any wrist size",
-        "Lightweight – Barely-there feel for all-day wear",
-        "Versatile style – Dress it up or down, or layer it up for extra style points"
-      ],
-      stock: 4,
-      metal: "Sterling Silver",
-      stone: "None",
-      style: "Modern"
-    },
-    {
-      id: 2,
-      name: "Star Charm Bracelet",
-      price: 899,
-      image: "/api/placeholder/600/600",
-      category: "Bracelets"
-    },
-    {
-      id: 3,
-      name: "Infinity Bracelet",
-      price: 999,
-      image: "/api/placeholder/600/600",
-      category: "Bracelets"
+  // Use the prop category if available, otherwise use the URL category
+  const categoryName = propCategory || urlCategory || '';
+
+  const products = dummyProducts.filter(product => 
+    product.category && product.category.toLowerCase() === categoryName.toLowerCase()
+  );
+
+  const filteredProducts = products.filter(product => {
+    if (filters.metalType && product.metalType !== filters.metalType) return false;
+    if (filters.stoneType && product.stoneType !== filters.stoneType) return false;
+    if (filters.priceRange !== 'all') {
+      const [min, max] = filters.priceRange.split('-').map(Number);
+      if (product.price < min || product.price > max) return false;
     }
-  ];
+    return true;
+  });
+
+  const metalTypes = [...new Set(products.map(product => product.metalType).filter(Boolean))];
+  const stoneTypes = [...new Set(products.map(product => product.stoneType).filter(Boolean))];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,170 +66,65 @@ const CategoryPage = () => {
     setTimeout(() => setIsLoading(false), 500);
   };
 
-  const openProductDetail = (product) => {
-    setSelectedProduct(product);
-    setQuantity(1);
-  };
-
-  const closeProductDetail = () => {
-    setSelectedProduct(null);
-  };
-
   return (
-    <div className="min-h-screen bg-ivory">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white shadow-soft">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <nav className="hidden md:flex space-x-8">
-              <a href="/" className="nav-link font-serif text-lg">Zithara</a>
-              <a href="/rings" className="nav-link">Rings</a>
-              <a href="/necklaces" className="nav-link">Necklaces</a>
-              <a href="/earrings" className="nav-link">Earrings</a>
-              <a href="/bracelets" className="nav-link">Bracelets</a>
-            </nav>
+    <div className="min-h-screen bg-[#f8f5f2]">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{categoryName} Collection</h1>
+        
+        {/* Filters */}
+        <div className="mb-8 flex flex-wrap gap-4">
+          <select
+            className="p-2 border rounded-md"
+            value={filters.metalType}
+            onChange={(e) => setFilters(prev => ({ ...prev, metalType: e.target.value }))}
+          >
+            <option value="">All Metals</option>
+            {metalTypes.map(type => (
+              <option key={type} value={type}>
+                {type.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+              </option>
+            ))}
+          </select>
 
-            <div className="flex items-center space-x-6">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search"
-                  className="w-48 pl-10 pr-4 py-2 border-b border-charcoal/20 focus:border-burgundy transition-colors bg-transparent"
-                />
-                <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-charcoal/60" size={20} />
-              </div>
-              
-              <button className="nav-link">
-                <Heart size={20} />
-              </button>
-              
-              <button className="nav-link relative">
-                <ShoppingBag size={20} />
-                <span className="absolute -top-2 -right-2 bg-burgundy text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">0</span>
-              </button>
-            </div>
+          <select
+            className="p-2 border rounded-md"
+            value={filters.stoneType}
+            onChange={(e) => setFilters(prev => ({ ...prev, stoneType: e.target.value }))}
+          >
+            <option value="">All Stones</option>
+            {stoneTypes.map(type => (
+              <option key={type} value={type}>
+                {type.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+              </option>
+            ))}
+          </select>
+
+          <select
+            className="p-2 border rounded-md"
+            value={filters.priceRange}
+            onChange={(e) => setFilters(prev => ({ ...prev, priceRange: e.target.value }))}
+          >
+            <option value="all">All Prices</option>
+            <option value="0-1000">Under $1,000</option>
+            <option value="1000-2000">$1,000 - $2,000</option>
+            <option value="2000-5000">$2,000 - $5,000</option>
+            <option value="5000-999999">Over $5,000</option>
+          </select>
+        </div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filteredProducts.map(product => (
+            <CategoryProductCard key={product.id} product={product} />
+          ))}
+        </div>
+
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">No {categoryName.toLowerCase()} found matching your criteria.</p>
           </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center text-sm mb-8">
-          <a href="/" className="text-charcoal/60 hover:text-burgundy transition-colors">Home</a>
-          <ChevronDown className="rotate-90 mx-2 text-charcoal/40" size={14} />
-          <span className="font-medium text-charcoal">{category || 'All Jewelry'}</span>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <aside className="md:w-64 shrink-0">
-            <div className="sticky top-24 space-y-6">
-              <div>
-                <h3 className="font-serif text-lg mb-4">Filters</h3>
-                
-                {/* Price Range */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">Price Range</h4>
-                    <ChevronUp size={20} className="text-charcoal/60" />
-                  </div>
-                  <div className="price-slider">
-                    <div className="price-slider-handle" style={{ left: '20%' }} />
-                    <div className="price-slider-handle" style={{ left: '80%' }} />
-                  </div>
-                  <div className="flex justify-between text-sm mt-2">
-                    <span>₹{filters.price[0]}</span>
-                    <span>₹{filters.price[1]}</span>
-                  </div>
-                </div>
-
-                {/* Metal Type */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">Metal</h4>
-                    <ChevronUp size={20} className="text-charcoal/60" />
-                  </div>
-                  <div className="space-y-2">
-                    {['Gold', 'Silver', 'Rose Gold', 'Platinum'].map(metal => (
-                      <label key={metal} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          className="form-checkbox text-burgundy rounded border-charcoal/20"
-                          checked={filters.metal.includes(metal)}
-                          onChange={() => handleFilterChange('metal', metal)}
-                        />
-                        <span className="ml-2 text-sm">{metal}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Stone Type */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">Stone</h4>
-                    <ChevronDown size={20} className="text-charcoal/60" />
-                  </div>
-                </div>
-
-                {/* Style */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">Style</h4>
-                    <ChevronDown size={20} className="text-charcoal/60" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          {/* Main Content */}
-          <div className="flex-1">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="font-serif text-3xl">{category || 'All Jewelry'}</h1>
-              
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-charcoal/60">{products.length} products</span>
-                
-                <select
-                  value={sortBy}
-                  onChange={(e) => handleSortChange(e.target.value)}
-                  className="text-sm border-none focus:ring-0 bg-transparent"
-                >
-                  <option value="recommended">Recommended</option>
-                  <option value="price-low-high">Price: Low to High</option>
-                  <option value="price-high-low">Price: High to Low</option>
-                  <option value="newest">Newest</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Products Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map(product => (
-                <div key={product.id} className="group product-card animate-fade-in">
-                  <div className="product-image-wrapper">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="product-image"
-                    />
-                    <button className="quick-view-button">Quick View</button>
-                    <button className="wishlist-button">
-                      <Heart size={18} className="text-charcoal/60 group-hover:text-burgundy transition-colors" />
-                    </button>
-                  </div>
-                  
-                  <div className="p-4">
-                    <h3 className="font-serif text-lg mb-1">{product.name}</h3>
-                    <p className="text-burgundy font-medium">₹{product.price}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </main>
+        )}
+      </div>
 
       {/* Back to Top Button */}
       <button

@@ -21,58 +21,35 @@ import Earrings from './components/pages/Earrings';
 import Rings from './components/pages/Rings';
 import Bracelets from './components/pages/Bracelets';
 import VisualSearch from './components/pages/VisualSearch';
+import Favorites from './components/pages/Favorites';
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <>
       <Navbar />
       <main className="flex-grow">
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/search" element={<SearchResults />} />
+          <Route path="/visual-search" element={<VisualSearch />} />
+          <Route path="/search-results" element={<SearchResults />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/category/:category" element={<CategoryPage />} />
-          <Route path="/visual-search" element={<VisualSearch />} />
-          <Route path="/rings" element={<Rings />} />
           <Route path="/necklaces" element={<Necklaces />} />
           <Route path="/earrings" element={<Earrings />} />
+          <Route path="/rings" element={<Rings />} />
           <Route path="/bracelets" element={<Bracelets />} />
-          
-          {/* Auth Routes */}
-          <Route
-            path="/login"
-            element={user ? <Navigate to="/dashboard" /> : <Login />}
-          />
-          <Route
-            path="/register"
-            element={user ? <Navigate to="/dashboard" /> : <Register />}
-          />
-
-          {/* Protected Routes */}
-          <Route
-            path="/dashboard"
-            element={user ? <UserDashboard /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/admin"
-            element={
-              user?.role === 'admin' ? (
-                <AdminDashboard />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-
-          {/* 404 Route */}
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />} />
+          <Route path="/admin" element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer />
-    </div>
+    </>
   );
 };
 

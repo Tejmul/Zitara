@@ -63,67 +63,54 @@ const ProductDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f5f2]">
+        <div className="loading-spinner" />
       </div>
     );
   }
 
   if (error || !product) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f5f2]">
         <div className="text-center">
-          <div className="text-red-500 text-lg mb-4">{error || 'Product not found'}</div>
+          <div className="text-[#9d4e4e] text-lg mb-4">{error || 'Product not found'}</div>
+          <button
+            onClick={() => navigate(-1)}
+            className="btn btn-primary"
+          >
+            Go Back
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-ivory">
-      {/* Announcement Bar */}
-      <div className="bg-burgundy text-white py-2 text-center text-sm">
-        <p>Free shipping on orders over $500 | 30-day returns</p>
-      </div>
-
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <button onClick={() => navigate(-1)} className="text-charcoal hover:text-burgundy">
-                <ChevronUp className="w-6 h-6 transform rotate-90" />
-              </button>
-              <h1 className="ml-4 font-serif text-xl text-charcoal">Product Details</h1>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+    <div className="min-h-screen bg-[#f8f5f2]">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="product-image-wrapper rounded-lg overflow-hidden">
+            <div className="aspect-square rounded-lg overflow-hidden bg-white">
               <img
-                src={product.images[selectedImage]?.url}
+                src={product.images[selectedImage]}
                 alt={product.name}
-                className="product-image"
+                className="w-full h-full object-cover"
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               {product.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`product-image-wrapper rounded-lg overflow-hidden ${
-                    selectedImage === index ? 'ring-2 ring-burgundy' : ''
+                  className={`aspect-square rounded-lg overflow-hidden ${
+                    selectedImage === index ? 'ring-2 ring-[#9d4e4e]' : ''
                   }`}
                 >
                   <img
-                    src={image.url}
+                    src={image}
                     alt={`${product.name} view ${index + 1}`}
-                    className="product-image"
+                    className="w-full h-full object-cover"
                   />
                 </button>
               ))}
@@ -133,87 +120,86 @@ const ProductDetails = () => {
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="font-serif text-3xl text-charcoal mb-2">{product.name}</h1>
-              <p className="text-2xl text-burgundy font-medium">
-                ${product.price.toLocaleString()}
-              </p>
+              <h1 className="text-3xl font-serif text-[#1a1a1a] mb-2">{product.name}</h1>
+              <p className="text-2xl text-[#9d4e4e] font-medium">${product.price}</p>
             </div>
 
-            <p className="text-charcoal/80">{product.description}</p>
-
-            {/* Product Details */}
-            <div className="grid grid-cols-2 gap-4">
-              {Object.entries(product.details).map(([key, value]) => (
-                <div key={key} className="bg-white p-4 rounded-lg shadow-soft">
-                  <h3 className="text-sm text-charcoal/60 capitalize">{key}</h3>
-                  <p className="text-charcoal font-medium">{value}</p>
-                </div>
-              ))}
+            <div className="prose prose-sm text-[#1a1a1a]/70">
+              <p>{product.description}</p>
             </div>
 
-            {/* Quantity and Actions */}
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
-                <span className="text-charcoal">Quantity:</span>
-                <div className="flex items-center border border-charcoal/20 rounded-lg">
+                <div className="flex items-center border border-[#1a1a1a]/10 rounded-md">
                   <button
                     onClick={() => handleQuantityChange(-1)}
-                    className="p-2 text-charcoal hover:text-burgundy"
+                    className="p-2 hover:bg-[#1a1a1a]/5"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="px-4 py-2 text-charcoal">{quantity}</span>
+                  <span className="px-4 py-2">{quantity}</span>
                   <button
                     onClick={() => handleQuantityChange(1)}
-                    className="p-2 text-charcoal hover:text-burgundy"
+                    className="p-2 hover:bg-[#1a1a1a]/5"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
-
-              <div className="flex space-x-4">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 btn-primary"
+                  className="btn btn-primary flex-1"
                 >
                   Add to Cart
                 </button>
+              </div>
+
+              <div className="flex items-center space-x-4">
                 <button
                   onClick={handleWishlist}
-                  className={`p-3 rounded-full border ${
-                    isWishlisted
-                      ? 'bg-burgundy text-white border-burgundy'
-                      : 'border-charcoal/20 text-charcoal hover:text-burgundy hover:border-burgundy'
+                  className={`p-2 rounded-md transition-colors ${
+                    isWishlisted ? 'text-[#9d4e4e]' : 'text-[#1a1a1a] hover:text-[#9d4e4e]'
                   }`}
                 >
-                  <Heart className="w-5 h-5" />
+                  <Heart className="w-5 h-5" fill={isWishlisted ? 'currentColor' : 'none'} />
                 </button>
                 <button
                   onClick={handleShare}
-                  className="p-3 rounded-full border border-charcoal/20 text-charcoal hover:text-burgundy hover:border-burgundy"
+                  className="p-2 text-[#1a1a1a] hover:text-[#9d4e4e] transition-colors rounded-md"
                 >
                   <Share2 className="w-5 h-5" />
                 </button>
               </div>
+            </div>
+
+            <div className="border-t border-[#1a1a1a]/10 pt-6">
+              <h2 className="text-lg font-serif text-[#1a1a1a] mb-4">Product Details</h2>
+              <dl className="space-y-4">
+                <div className="flex justify-between">
+                  <dt className="text-[#1a1a1a]/60">Metal Type</dt>
+                  <dd className="text-[#1a1a1a]">{product.metalType}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-[#1a1a1a]/60">Stone Type</dt>
+                  <dd className="text-[#1a1a1a]">{product.stoneType}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-[#1a1a1a]/60">Weight</dt>
+                  <dd className="text-[#1a1a1a]">{product.weight}g</dd>
+                </div>
+              </dl>
             </div>
           </div>
         </div>
       </div>
 
       {/* Back to Top Button */}
-      <button
-        onClick={scrollToTop}
-        className={`back-to-top ${showBackToTop ? 'show' : ''}`}
-      >
-        <ArrowUp className="w-5 h-5" />
-      </button>
-
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="loading-spinner" />
-        </div>
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 p-3 bg-[#9d4e4e] text-white rounded-full shadow-lg hover:bg-[#7a3e3e] transition-all transform hover:scale-110"
+        >
+          <ArrowUp className="w-6 h-6" />
+        </button>
       )}
     </div>
   );

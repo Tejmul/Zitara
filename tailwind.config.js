@@ -6,14 +6,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        burgundy: {
-          DEFAULT: '#800020',
-          dark: '#600018',
-          light: '#A00028',
-        },
-        charcoal: '#36454F',
-        ivory: '#FFFFF0',
-        gold: '#d4af37',
+        'rich-black': '#2d3142',
+        'burgundy': '#9d4e4e',
+        'gold': '#d5a021',
+        'cream': '#f9f4e8',
+        'pearl': '#e6e6e6',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

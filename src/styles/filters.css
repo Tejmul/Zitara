@@ -1,0 +1,53 @@
+.filter-section {
+  @apply mb-6;
+}
+
+.filter-title {
+  @apply font-medium text-[#1a1a1a] mb-3;
+}
+
+.filter-options {
+  @apply space-y-2;
+}
+
+.filter-option {
+  @apply flex items-center;
+}
+
+.filter-checkbox {
+  @apply w-4 h-4 text-[#9d4e4e] border-[#1a1a1a]/20 rounded focus:ring-[#9d4e4e] focus:ring-offset-0;
+}
+
+.filter-label {
+  @apply ml-2 text-[#1a1a1a]/80 text-sm;
+}
+
+/* Hover effects */
+.filter-option:hover .filter-label {
+  @apply text-[#9d4e4e];
+}
+
+/* Selected state */
+.filter-checkbox:checked + .filter-label {
+  @apply text-[#9d4e4e] font-medium;
+}
+
+/* Sticky sidebar */
+.sticky {
+  @apply transition-all duration-300;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-section {
+    @apply mb-4;
+  }
+  
+  .filter-title {
+    @apply mb-2;
+  }
+  
+  .filter-options {
+    @apply space-y-1.5;
+  }
+} 

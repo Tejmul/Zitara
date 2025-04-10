@@ -1,249 +1,261 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const path = require('path');
-const tf = require('@tensorflow/tfjs-node');
-const { createCanvas, loadImage } = require('canvas');
 const mongoose = require('mongoose');
+const tf = require('@tensorflow/tfjs-node');
+const sharp = require('sharp');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const port = 3001;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/jewellery_db', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
-
-// Product Schema
-const productSchema = new mongoose.Schema({
-  name: String,
-  price: Number,
-  images: [{ url: String }],
-  category: String,
-  features: Array,
-  metalType: String,
-  stoneType: String,
-  style: String,
-});
-
-const Product = mongoose.model('Product', productSchema);
-
-// Multer configuration for image upload
+// Configure multer for image uploads
 const storage = multer.memoryStorage();
-const upload = multer({
+const upload = multer({ 
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    // Accept only image files
-    if (!file.mimetype.startsWith('image/')) {
-      return cb(new Error('Only image files are allowed'));
-    }
-    cb(null, true);
-  },
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  }
 });
 
-// Load pre-trained model
-let model;
-let modelLoaded = false;
+// Enable CORS
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/jewelry_db', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch(err => {
+  console.error('MongoDB connection error:', err);
+});
+
+// Product Schema
+const ProductSchema = new mongoose.Schema({
+  id: String,
+  name: String,
+  category: String,
+  price: Number,
+  description: String,
+  image: String,
+  features: [Number],
+  metalType: String,
+  stoneType: String
+});
+
+const Product = mongoose.model('Product', ProductSchema);
+
+// Load the AI model
+let model;
 async function loadModel() {
   try {
-    const modelPath = 'file://' + path.join(__dirname, 'model', 'model.json');
-    model = await tf.loadLayersModel(modelPath);
-    modelLoaded = true;
-    console.log('AI model loaded successfully');
+    // Load MobileNet model for feature extraction
+    model = await tf.loadLayersModel('https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json');
+    console.log('Model loaded successfully');
+    return true;
   } catch (error) {
-    console.error('Error loading AI model:', error);
-    console.log('Note: Please run create_model.js first to generate the model files');
-    modelLoaded = false;
+    console.error('Error loading model:', error);
+    return false;
   }
 }
 
-// Initialize model before starting server
-async function initializeServer() {
-  await loadModel();
-  
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Model status: ${modelLoaded ? 'Loaded successfully' : 'Failed to load'}`);
-  });
-}
+// Load model at startup
+loadModel().then(() => {
+  console.log('Initial model load completed');
+}).catch(err => {
+  console.error('Failed to load model at startup:', err);
+});
 
-// Extract features from image
+// Function to extract features from an image
 async function extractFeatures(imageBuffer) {
-  if (!model) {
-    throw new Error('AI model not loaded');
-  }
-
   try {
-    // Create canvas and load image
-    const canvas = createCanvas(224, 224);
-    const ctx = canvas.getContext('2d');
-    const image = await loadImage(imageBuffer);
-    
-    // Draw and preprocess image
-    ctx.drawImage(image, 0, 0, 224, 224);
-    let tensor = tf.browser.fromPixels(canvas)
+    // Resize image to 224x224 (MobileNet input size) and convert to RGB
+    const resizedImageBuffer = await sharp(imageBuffer)
+      .resize(224, 224, {
+        fit: 'contain',
+        background: { r: 255, g: 255, b: 255, alpha: 1 }
+      })
+      .removeAlpha()
+      .toFormat('jpeg')
+      .toBuffer();
+
+    // Convert buffer to tensor
+    const imageTensor = tf.node.decodeImage(resizedImageBuffer, 3)
+      .expandDims(0)
       .toFloat()
-      .div(255.0) // Normalize to [0,1]
-      .expandDims();
-    
-    // Get features from model
-    const features = await model.predict(tensor).data();
-    
-    // Clean up
-    tensor.dispose();
-    
-    return Array.from(features);
+      .div(255.0);
+
+    // Get features from the second-to-last layer
+    const features = model.predict(imageTensor);
+    const featuresArray = await features.data();
+
+    // Convert 1024 features to 512 by taking every other feature
+    const reducedFeatures = Array.from(featuresArray).filter((_, i) => i % 2 === 0);
+
+    // Normalize the features
+    const magnitude = Math.sqrt(reducedFeatures.reduce((sum, val) => sum + val * val, 0));
+    const normalizedFeatures = reducedFeatures.map(val => val / magnitude);
+
+    // Cleanup
+    imageTensor.dispose();
+    features.dispose();
+
+    return normalizedFeatures;
   } catch (error) {
     console.error('Error extracting features:', error);
     throw new Error('Failed to process image: ' + error.message);
   }
 }
 
-// API Routes
-app.post('/api/visual-search', upload.single('image'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'No image uploaded' });
-    }
-
-    if (!modelLoaded) {
-      return res.status(503).json({ 
-        message: 'AI model not ready. Please try again in a few moments.',
-        modelStatus: 'not_loaded'
-      });
-    }
-
-    // Extract features from uploaded image
-    const features = await extractFeatures(req.file.buffer);
-
-    // Find similar products
-    const products = await Product.find({});
-    
-    if (!products.length) {
-      return res.status(404).json({ 
-        message: 'No products available for comparison',
-        results: []
-      });
-    }
-
-    const similarProducts = products
-      .map(product => ({
-        ...product.toObject(),
-        similarity: calculateSimilarity(features, product.features)
-      }))
-      .filter(product => product.similarity > 50) // Only return products with >50% similarity
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 6);
-
-    res.json({
-      results: similarProducts,
-      total: similarProducts.length,
-      message: similarProducts.length ? 'Similar products found' : 'No similar products found'
-    });
-  } catch (error) {
-    console.error('Visual search error:', error);
-    res.status(500).json({ 
-      message: error.message || 'Error processing image',
-      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-});
-
-// Calculate cosine similarity between feature vectors
-function calculateSimilarity(features1, features2) {
-  if (!features1 || !features2 || features1.length !== features2.length) {
-    throw new Error('Invalid feature vectors');
-  }
-
-  const dotProduct = features1.reduce((sum, val, i) => sum + val * features2[i], 0);
-  const magnitude1 = Math.sqrt(features1.reduce((sum, val) => sum + val * val, 0));
-  const magnitude2 = Math.sqrt(features2.reduce((sum, val) => sum + val * val, 0));
-  
-  if (magnitude1 === 0 || magnitude2 === 0) {
+// Function to calculate cosine similarity
+function cosineSimilarity(vec1, vec2) {
+  if (!vec1 || !vec2 || vec1.length !== vec2.length) {
+    console.error('Invalid vectors for similarity calculation:', { vec1Length: vec1?.length, vec2Length: vec2?.length });
     return 0;
   }
   
-  return (dotProduct / (magnitude1 * magnitude2)) * 100;
+  // Both vectors should already be normalized
+  const dotProduct = vec1.reduce((acc, val, i) => acc + val * vec2[i], 0);
+  return dotProduct;
 }
 
-// Product routes
-app.get('/api/products/:id', async (req, res) => {
+// Visual search endpoint
+app.post('/api/visual-search', upload.single('image'), async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image uploaded' });
     }
-    res.json(product);
+
+    if (!model) {
+      const loaded = await loadModel();
+      if (!loaded) {
+        return res.status(503).json({ error: 'AI model failed to load' });
+      }
+    }
+
+    // Extract features from the uploaded image
+    const features = await extractFeatures(req.file.buffer);
+    console.log('Extracted features length:', features.length);
+
+    // Get all products from the database
+    const products = await Product.find({});
+    console.log('Found products:', products.length);
+
+    if (products.length === 0) {
+      return res.status(404).json({ error: 'No products found in database' });
+    }
+
+    // Calculate similarity scores and add confidence percentage
+    const results = products.map(product => {
+      const similarity = cosineSimilarity(features, product.features);
+      return {
+        ...product.toObject(),
+        similarity,
+        confidence: Math.round(similarity * 100)
+      };
+    });
+
+    // Sort by similarity score (descending) and filter results with at least 25% confidence
+    const filteredResults = results
+      .filter(result => result.confidence >= 25)
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 5);
+
+    console.log('Filtered results:', filteredResults.length);
+    console.log('Confidence scores:', filteredResults.map(r => r.confidence));
+
+    if (filteredResults.length === 0) {
+      return res.status(404).json({ error: 'No similar products found' });
+    }
+
+    res.json(filteredResults);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching product' });
+    console.error('Error processing image:', error);
+    res.status(500).json({ error: error.message || 'Failed to process image' });
   }
 });
 
-app.post('/api/products/similar', async (req, res) => {
+// Visual search endpoint for base64 images
+app.post('/api/visual-search/base64', async (req, res) => {
   try {
-    const { features } = req.body;
-    
-    if (!features || !Array.isArray(features)) {
-      return res.status(400).json({ message: 'Invalid feature vector' });
+    const { image } = req.body;
+
+    if (!image) {
+      return res.status(400).json({ error: 'No image data provided' });
     }
 
+    if (!model) {
+      const loaded = await loadModel();
+      if (!loaded) {
+        return res.status(503).json({ error: 'AI model failed to load' });
+      }
+    }
+
+    // Convert base64 to buffer
+    const imageBuffer = Buffer.from(image.split(',')[1], 'base64');
+
+    // Extract features from the image
+    const features = await extractFeatures(imageBuffer);
+
+    // Get all products from the database
     const products = await Product.find({});
-    
-    if (!products.length) {
-      return res.status(404).json({ 
-        message: 'No products available for comparison',
-        results: []
-      });
+
+    if (products.length === 0) {
+      return res.status(404).json({ error: 'No products found in database' });
     }
 
-    const similarProducts = products
-      .map(product => ({
+    // Calculate similarity scores and add confidence percentage
+    const results = products.map(product => {
+      const similarity = cosineSimilarity(features, product.features);
+      return {
         ...product.toObject(),
-        similarity: calculateSimilarity(features, product.features)
-      }))
-      .filter(product => product.similarity > 50)
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 6);
+        similarity,
+        confidence: Math.round(similarity * 100)
+      };
+    });
 
-    res.json({
-      results: similarProducts,
-      total: similarProducts.length,
-      message: similarProducts.length ? 'Similar products found' : 'No similar products found'
-    });
+    // Sort by similarity score (descending) and filter results with at least 10% confidence
+    const filteredResults = results
+      .filter(result => result.confidence >= 10)
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 5);
+
+    if (filteredResults.length === 0) {
+      return res.status(404).json({ error: 'No similar products found' });
+    }
+
+    res.json(filteredResults);
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Error finding similar products',
-      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    console.error('Error processing image:', error);
+    res.status(500).json({ error: error.message || 'Failed to process image' });
+  }
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', modelLoaded: !!model });
+});
+
+// Get all products endpoint
+app.get('/api/products', async (req, res) => {
+  try {
+    const products = await Product.find({});
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  if (err instanceof multer.MulterError) {
-    if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ message: 'File size too large. Maximum size is 10MB.' });
-    }
-    return res.status(400).json({ message: 'Error uploading file.' });
-  }
-  
-  console.error(err);
-  res.status(500).json({ message: 'Internal server error' });
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something broke!' });
 });
 
-// Remove the old app.listen call and replace with initializeServer
-initializeServer().catch(err => {
-  console.error('Failed to initialize server:', err);
-  process.exit(1);
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 }); 

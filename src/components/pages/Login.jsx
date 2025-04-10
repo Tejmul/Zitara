@@ -29,154 +29,118 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-ivory">
-      {/* Announcement Bar */}
-      <div className="bg-burgundy text-white py-2 text-center text-sm">
-        <p>Free shipping on orders over $500 | 30-day returns</p>
-      </div>
+    <div className="min-h-screen bg-[#f8f5f2] flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-serif text-[#1a1a1a]">Welcome back</h2>
+          <p className="mt-2 text-sm text-[#1a1a1a]/60">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-[#9d4e4e] hover:text-[#7a3e3e]">
+              Sign up
+            </Link>
+          </p>
+        </div>
 
-      <div className="flex min-h-[calc(100vh-32px)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <h2 className="font-serif text-3xl text-charcoal">Welcome back</h2>
-            <p className="mt-2 text-sm text-charcoal/60">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-burgundy hover:text-burgundy/80">
-                Sign up
-              </Link>
-            </p>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          {error && (
+            <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-[#1a1a1a]">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input mt-1"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-[#1a1a1a]">
+                Password
+              </label>
+              <div className="relative mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#1a1a1a]/40 hover:text-[#1a1a1a]/60"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-            {error && (
-              <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500">
-                {error}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-charcoal">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-charcoal/20 px-4 py-2 text-charcoal placeholder-charcoal/60 focus:border-burgundy focus:ring-burgundy"
-                  placeholder="Enter your email"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-charcoal">
-                  Password
-                </label>
-                <div className="relative mt-1">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full rounded-lg border border-charcoal/20 px-4 py-2 text-charcoal placeholder-charcoal/60 focus:border-burgundy focus:ring-burgundy pr-10"
-                    placeholder="Enter your password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-charcoal/60 hover:text-burgundy"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 text-[#9d4e4e] focus:ring-[#9d4e4e] border-[#1a1a1a]/20 rounded"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-[#1a1a1a]/60">
+                Remember me
+              </label>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-charcoal/20 text-burgundy focus:ring-burgundy"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-charcoal">
-                  Remember me
-                </label>
-              </div>
-
-              <Link
-                to="/forgot-password"
-                className="text-sm text-burgundy hover:text-burgundy/80"
-              >
+            <div className="text-sm">
+              <a href="#" className="text-[#9d4e4e] hover:text-[#7a3e3e]">
                 Forgot your password?
-              </Link>
+              </a>
             </div>
+          </div>
 
+          <div>
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary w-full"
+              className="btn btn-primary w-full"
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
-          </form>
+          </div>
+        </form>
 
+        <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-charcoal/20"></div>
+              <div className="w-full border-t border-[#1a1a1a]/10" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-ivory px-2 text-charcoal/60">Or continue with</span>
+              <span className="px-2 bg-[#f8f5f2] text-[#1a1a1a]/60">
+                Or continue with
+              </span>
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
-              className="flex w-full items-center justify-center rounded-lg border border-charcoal/20 bg-white px-4 py-2 text-sm font-medium text-charcoal hover:bg-charcoal/5"
-            >
-              <img
-                className="mr-2 h-5 w-5"
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="Google logo"
-              />
-              Google
-            </button>
-            <button
-              type="button"
-              className="flex w-full items-center justify-center rounded-lg border border-charcoal/20 bg-white px-4 py-2 text-sm font-medium text-charcoal hover:bg-charcoal/5"
-            >
-              <img
-                className="mr-2 h-5 w-5"
-                src="https://www.svgrepo.com/show/448234/facebook.svg"
-                alt="Facebook logo"
-              />
-              Facebook
-            </button>
           </div>
         </div>
       </div>
-
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="loading-spinner" />
-        </div>
-      )}
     </div>
   );
 };
