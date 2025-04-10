@@ -1,10 +1,10 @@
 // src/components/search/ProductCard.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, CheckCircle } from 'lucide-react';
 import { useFavorites } from '../../context/FavoritesContext';
 
-const ProductCard = ({ product, similarity }) => {
+const ProductCard = ({ product, similarity, isExactMatch }) => {
   const [imageError, setImageError] = useState(false);
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
   
@@ -21,8 +21,20 @@ const ProductCard = ({ product, similarity }) => {
     }
   };
 
+  // Format similarity score
+  const similarityScore = similarity ? Math.round(similarity * 100) : null;
+  
+  // Determine similarity color based on score
+  const getSimilarityColor = (score) => {
+    if (score === 100) return 'bg-green-100 text-green-800';
+    if (score >= 90) return 'bg-green-100 text-green-800';
+    if (score >= 80) return 'bg-blue-100 text-blue-800';
+    if (score >= 70) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-gray-100 text-gray-800';
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 ${isExactMatch ? 'ring-2 ring-green-500' : ''}`}>
       <Link to={`/product/${product.id}`} className="block relative">
         <div className="relative aspect-square">
           <img
@@ -41,9 +53,16 @@ const ProductCard = ({ product, similarity }) => {
               className={`w-4 h-4 ${isFavorite(product.id) ? 'text-[#9d4e4e] fill-current' : 'text-gray-600'}`}
             />
           </button>
-          {similarity && (
-            <div className="absolute top-3 left-3 px-2 py-1 bg-white/90 rounded text-xs font-medium text-[#9d4e4e]">
-              {Math.round(similarity * 100)}% Match
+          {similarityScore && (
+            <div className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-medium ${getSimilarityColor(similarityScore)} flex items-center`}>
+              {isExactMatch ? (
+                <>
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  <span>Exact Match</span>
+                </>
+              ) : (
+                `${similarityScore}% Match`
+              )}
             </div>
           )}
         </div>

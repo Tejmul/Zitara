@@ -1,15 +1,32 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Info, Search } from 'lucide-react';
 import { useSearch } from '../../contexts/SearchContext';
+import { dummyProducts } from '../../data/dummyProducts';
 
 const VisualSearch = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [error, setError] = useState('');
+  const [isExactMatch, setIsExactMatch] = useState(false);
+  const [matchedProduct, setMatchedProduct] = useState(null);
   const { performSearch, loading } = useSearch();
   const navigate = useNavigate();
+
+  // Check if the selected image matches any of our dummy products
+  useEffect(() => {
+    if (previewUrl) {
+      // In a real implementation, we would compare image features
+      // For this demo, we'll check if the image URL is in our dummy data
+      const match = dummyProducts.find(product => product.image === previewUrl);
+      setIsExactMatch(!!match);
+      setMatchedProduct(match || null);
+    } else {
+      setIsExactMatch(false);
+      setMatchedProduct(null);
+    }
+  }, [previewUrl]);
 
   const onDrop = useCallback((acceptedFiles) => {
     setError('');
@@ -54,8 +71,15 @@ const VisualSearch = () => {
       const formData = new FormData();
       formData.append('image', selectedImage);
       
-      await performSearch(selectedImage);
-      navigate('/search-results');
+      const results = await performSearch(selectedImage);
+      navigate('/search-results', { 
+        state: { 
+          results: results,
+          message: isExactMatch 
+            ? `Found exact match: ${matchedProduct.name}` 
+            : 'Here are items similar to your image'
+        }
+      });
     } catch (err) {
       console.error('Search error:', err);
       setError(err.message || 'An error occurred during visual search');
@@ -67,6 +91,8 @@ const VisualSearch = () => {
     setSelectedImage(null);
     setPreviewUrl('');
     setError('');
+    setIsExactMatch(false);
+    setMatchedProduct(null);
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -76,6 +102,19 @@ const VisualSearch = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-serif text-center mb-8">Visual Search</h1>
+        
+        {/* Info Box */}
+        <div className="mb-6 p-4 bg-blue-50 rounded-lg flex items-start">
+          <Info className="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
+          <div>
+            <p className="text-sm text-blue-700">
+              <strong>Demo Mode:</strong> This visual search is using dummy data. Upload any image to see matching jewelry items from our catalog.
+            </p>
+            <p className="text-sm text-blue-700 mt-2">
+              <strong>Tip:</strong> For best results, try uploading one of the product images from our catalog.
+            </p>
+          </div>
+        </div>
         
         {/* Image Upload Area */}
         <div
@@ -98,6 +137,12 @@ const VisualSearch = () => {
               >
                 <X className="w-5 h-5 text-gray-600" />
               </button>
+              
+              {isExactMatch && (
+                <div className="absolute top-2 left-2 px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
+                  Exact Match Found!
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -117,6 +162,18 @@ const VisualSearch = () => {
         {error && (
           <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
             {error}
+          </div>
+        )}
+
+        {isExactMatch && matchedProduct && (
+          <div className="mt-4 p-4 bg-green-50 rounded-lg">
+            <div className="flex items-center">
+              <Search className="w-5 h-5 text-green-500 mr-2" />
+              <h3 className="font-medium text-green-800">Exact Match Found!</h3>
+            </div>
+            <p className="text-sm text-green-700 mt-1">
+              This image matches "{matchedProduct.name}" in our catalog. Click search to see this item and similar products.
+            </p>
           </div>
         )}
 

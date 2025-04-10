@@ -42,6 +42,8 @@ export const SearchProvider = ({ children }) => {
           timestamp: new Date().toISOString(),
           resultCount: response.results.length
         }, ...prev].slice(0, 10)); // Keep only last 10 searches
+
+        return response.results;
       } else {
         throw new Error('Invalid response format from server');
       }
@@ -49,6 +51,7 @@ export const SearchProvider = ({ children }) => {
       console.error('Search error:', err);
       setError(err.message || 'An error occurred during visual search');
       setSearchResults([]);
+      throw err;
     } finally {
       setLoading(false);
     }

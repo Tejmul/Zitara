@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { dummyProducts } from '../data/dummyProducts';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3004/api';
 
@@ -41,6 +42,27 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Function to simulate image comparison
+const compareImages = (image1, image2) => {
+  // Check if the images are the same URL
+  if (image1 === image2) {
+    return 1.0; // Perfect match
+  }
+  
+  // Extract image URLs from the dummy products
+  const dummyImageUrls = dummyProducts.map(product => product.image);
+  
+  // Check if the uploaded image URL matches any of the dummy product images
+  if (dummyImageUrls.includes(image1)) {
+    // If the uploaded image is one of our dummy products, give it a high similarity
+    return 0.95;
+  }
+  
+  // For other cases, generate a random similarity score
+  // but make it lower than exact matches
+  return Math.random() * 0.3 + 0.5; // Random score between 0.5 and 0.8
+};
+
 // Function to check if a port is available
 const checkPort = async (port) => {
   try {
@@ -80,21 +102,66 @@ export const visualSearchService = {
         throw new Error('No image selected');
       }
 
-      // Update API URL with active port
-      const activePort = await findActivePort();
-      apiClient.defaults.baseURL = `http://localhost:${activePort}/api`;
-
-      // Make the visual search request
-      const response = await apiClient.post('/visual-search', formData);
-
-      // Validate response
-      if (!response.data) {
-        throw new Error('Failed to process image');
+      // Get the image file
+      const imageFile = formData.get('image');
+      
+      // Create a URL for the image
+      const imageUrl = URL.createObjectURL(imageFile);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Check if the uploaded image matches any of our dummy products
+      const matchingProduct = dummyProducts.find(product => {
+        // In a real implementation, we would compare image features
+        // For this demo, we'll check if the image URL is in our dummy data
+        return product.image === imageUrl;
+      });
+      
+      // Find similar products from dummy data
+      let similarProducts;
+      
+      if (matchingProduct) {
+        // If we found an exact match, prioritize it and similar items
+        similarProducts = dummyProducts
+          .map(product => {
+            // Give the exact match a perfect score
+            if (product.id === matchingProduct.id) {
+              return { ...product, similarity: 1.0 };
+            }
+            
+            // Give similar items (same category, metal type, or stone type) higher scores
+            const isSimilarCategory = product.category === matchingProduct.category;
+            const isSimilarMetal = product.metalType === matchingProduct.metalType;
+            const isSimilarStone = product.stoneType === matchingProduct.stoneType;
+            
+            let similarity = 0.5; // Base similarity
+            
+            if (isSimilarCategory) similarity += 0.2;
+            if (isSimilarMetal) similarity += 0.15;
+            if (isSimilarStone) similarity += 0.15;
+            
+            return { ...product, similarity };
+          })
+          .sort((a, b) => b.similarity - a.similarity)
+          .slice(0, 8); // Return top 8 matches
+      } else {
+        // If no exact match, use the compareImages function
+        similarProducts = dummyProducts
+          .map(product => ({
+            ...product,
+            similarity: compareImages(imageUrl, product.image)
+          }))
+          .sort((a, b) => b.similarity - a.similarity)
+          .slice(0, 8); // Return top 8 matches
       }
-
+      
+      // Clean up the object URL
+      URL.revokeObjectURL(imageUrl);
+      
       return {
         success: true,
-        results: Array.isArray(response.data) ? response.data : [response.data],
+        results: similarProducts,
         message: 'Search completed successfully'
       };
     } catch (error) {
@@ -110,27 +177,21 @@ export const visualSearchService = {
         throw new Error('No image data provided');
       }
 
-      // Update API URL with active port
-      const activePort = await findActivePort();
-      apiClient.defaults.baseURL = `http://localhost:${activePort}/api`;
-
-      // Make the visual search request
-      const response = await apiClient.post('/visual-search/base64', {
-        image: base64Image
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      // Validate response
-      if (!response.data) {
-        throw new Error('Failed to process image');
-      }
-
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Find similar products from dummy data
+      const similarProducts = dummyProducts
+        .map(product => ({
+          ...product,
+          similarity: compareImages(base64Image, product.image)
+        }))
+        .sort((a, b) => b.similarity - a.similarity)
+        .slice(0, 8); // Return top 8 matches
+      
       return {
         success: true,
-        results: Array.isArray(response.data) ? response.data : [response.data],
+        results: similarProducts,
         message: 'Search completed successfully'
       };
     } catch (error) {
@@ -159,20 +220,32 @@ export const visualSearchService = {
   // Get product details by ID
   getProductById: async (productId) => {
     try {
-      const response = await axios.get(`${API_URL}/products/${productId}`);
-      return response.data;
+      // Find product in dummy data
+      const product = dummyProducts.find(p => p.id === productId);
+      if (!product) {
+        throw new Error('Product not found');
+      }
+      return product;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch product details');
+      throw new Error(error.message || 'Failed to fetch product details');
     }
   },
 
   // Get similar products based on features
   getSimilarProducts: async (features) => {
     try {
-      const response = await axios.post(`${API_URL}/products/similar`, { features });
-      return response.data;
+      // Find similar products in dummy data based on features
+      const similarProducts = dummyProducts
+        .filter(product => 
+          (features.metalType && product.metalType === features.metalType) ||
+          (features.stoneType && product.stoneType === features.stoneType) ||
+          (features.category && product.category === features.category)
+        )
+        .slice(0, 4);
+      
+      return similarProducts;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch similar products');
+      throw new Error(error.message || 'Failed to fetch similar products');
     }
   }
 }; 

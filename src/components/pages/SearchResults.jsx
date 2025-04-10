@@ -2,16 +2,24 @@ import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useSearch } from '../../contexts/SearchContext';
 import ProductCard from '../search/ProductCard';
+import { CheckCircle } from 'lucide-react';
 
 const SearchResults = () => {
   const location = useLocation();
   const { searchResults: contextResults, loading, error, selectedImage } = useSearch();
   
   // Use location state if available, otherwise use context state
-  const { results, message } = location.state || { 
+  const searchState = location.state || { 
     results: contextResults, 
-    message: error || 'No results found'
+    message: error ? 'An error occurred' : 'No results found'
   };
+
+  const results = searchState.results || [];
+  const message = searchState.message;
+  
+  // Check if we have an exact match (similarity = 1.0)
+  const exactMatch = results.find(product => product.similarity === 1.0);
+  const hasExactMatch = !!exactMatch;
 
   if (loading) {
     return (
@@ -44,17 +52,41 @@ const SearchResults = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-serif mb-4">Search Results</h1>
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-[#9d4e4e]">
-              {message}
-            </span>
-            <span className="text-sm font-medium text-gray-500">
-              {results.length} {results.length === 1 ? 'item' : 'items'} found
-            </span>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-serif mb-4">Search Results</h1>
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-[#9d4e4e]">
+                {message}
+              </span>
+              <span className="text-sm font-medium text-gray-500">
+                {results.length} {results.length === 1 ? 'item' : 'items'} found
+              </span>
+            </div>
           </div>
+          {selectedImage && (
+            <div className="hidden md:block">
+              <img
+                src={selectedImage}
+                alt="Search reference"
+                className="w-24 h-24 object-cover rounded-lg shadow-md"
+              />
+            </div>
+          )}
         </div>
+        
+        {/* Exact Match Banner */}
+        {hasExactMatch && (
+          <div className="mb-6 p-4 bg-green-50 rounded-lg flex items-start">
+            <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+            <div>
+              <h3 className="font-medium text-green-800">Exact Match Found!</h3>
+              <p className="text-sm text-green-700 mt-1">
+                We found an exact match for your image: <strong>{exactMatch.name}</strong>
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Results Grid */}
         {results.length > 0 ? (
@@ -64,6 +96,7 @@ const SearchResults = () => {
                 key={product.id}
                 product={product}
                 similarity={product.similarity}
+                isExactMatch={product.similarity === 1.0}
               />
             ))}
           </div>
