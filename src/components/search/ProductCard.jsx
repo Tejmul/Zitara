@@ -58,10 +58,10 @@ const ProductCard = ({ product, similarity, isExactMatch }) => {
               {isExactMatch ? (
                 <>
                   <CheckCircle className="w-3 h-3 mr-1" />
-                  <span>Exact Match</span>
+                  <span>Perfect Match</span>
                 </>
               ) : (
-                `${similarityScore}% Match`
+                `${similarityScore}% Similar`
               )}
             </div>
           )}

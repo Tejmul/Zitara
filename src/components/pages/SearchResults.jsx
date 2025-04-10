@@ -80,7 +80,7 @@ const SearchResults = () => {
           <div className="mb-6 p-4 bg-green-50 rounded-lg flex items-start">
             <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
             <div>
-              <h3 className="font-medium text-green-800">Exact Match Found!</h3>
+              <h3 className="font-medium text-green-800">Perfect Match Found!</h3>
               <p className="text-sm text-green-700 mt-1">
                 We found an exact match for your image: <strong>{exactMatch.name}</strong>
               </p>

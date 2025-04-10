@@ -103,19 +103,6 @@ const VisualSearch = () => {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-serif text-center mb-8">Visual Search</h1>
         
-        {/* Info Box */}
-        <div className="mb-6 p-4 bg-blue-50 rounded-lg flex items-start">
-          <Info className="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" />
-          <div>
-            <p className="text-sm text-blue-700">
-              <strong>Demo Mode:</strong> This visual search is using dummy data. Upload any image to see matching jewelry items from our catalog.
-            </p>
-            <p className="text-sm text-blue-700 mt-2">
-              <strong>Tip:</strong> For best results, try uploading one of the product images from our catalog.
-            </p>
-          </div>
-        </div>
-        
         {/* Image Upload Area */}
         <div
           {...getRootProps()}
